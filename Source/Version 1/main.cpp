@@ -71,7 +71,7 @@ vector<distributor> assignDistributers(int fileCount, int distCount)
     int remainder = 0;
     if (fileCount % distCount != 0)
     {
-        int remainder = fileCount % distCount;
+        remainder = fileCount % distCount;
     }
 
     vector<distributor> distributors;
