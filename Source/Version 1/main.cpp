@@ -24,15 +24,18 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string>
+#include <map>
 
 using namespace std;
 
 struct distributor
 {
+    int id;
     int startIdx;
     int endIdx;
     int fileCount;
     std::vector<string> files;
+    std::vector<int> todoList;
 };
 
 struct Server
@@ -57,7 +60,8 @@ vector<string> getFiles(const char *dataRootPath)
         const char *name = entry->d_name;
         if ((name[0] != '.') && (entry->d_type == DT_REG))
         {
-            fileName.push_back(string(entry->d_name));
+            string filePath = string(dataRootPath) + string(entry->d_name);
+            fileName.push_back(filePath);
         }
     }
     closedir(directory);
@@ -91,6 +95,7 @@ vector<distributor> assignDistributers(int fileCount, int distCount)
 
         //assign values to dist and add to vector
         printf("distIdx: %d , start: %d, end: %d \n", i, start, end);
+        dist.id = i;
         dist.startIdx = start;
         dist.endIdx = end;
         dist.fileCount = end - start + 1;
@@ -101,6 +106,25 @@ vector<distributor> assignDistributers(int fileCount, int distCount)
         end += filePerDist;
     }
     return distributors;
+}
+
+map<int, int> distributeFiles(distributor &dist, vector<string> &files)
+{
+    // init map that holds distributor/file idx pairs to return
+    map<int, int> processFilePairs;
+
+    //loop through files in distributor range
+    for (int i = dist.startIdx; i < dist.endIdx; i++)
+    {
+        //read from file and get the num of process it should be assigned to
+        //add processes to current distributors todo list
+        // if their assigned process matches current distributor
+        // if not
+    }
+}
+
+int getProcessNum(string fileName)
+{
 }
 
 int main(int argc, const char *argv[])
@@ -120,8 +144,15 @@ int main(int argc, const char *argv[])
 
     server.distributors = assignDistributers(fileName.size(), server.childrenCount);
     cout << fileName.size() << " files found" << endl;
-    // for (int k = 0; k < fileName.size(); k++)
-    //     cout << "\t" << fileName[k] << endl;
+    for (int k = 0; k < fileName.size(); k++)
+        cout << "\t" << fileName[k] << endl;
 
+    // for (int k = 0; k < server.distributors.size(); k++)
+    // {
+    //     //init map
+    //     map<int, int> processFilePairs;
+    //     //distributor function here
+    //     processFilePairs = distributeFiles(server.distributors[k], fileName);
+    // }
     return 0;
 }
