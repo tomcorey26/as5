@@ -20,6 +20,7 @@
 //		#define	DT_WHT		14
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -123,8 +124,16 @@ map<int, int> distributeFiles(distributor &dist, vector<string> &files)
     }
 }
 
-int getProcessNum(string fileName)
+int getProcessNum(string filePath)
 {
+    ifstream inFile(filePath);
+    string procIdx;
+    if (inFile.is_open())
+    {
+        inFile >> procIdx;
+    }
+    inFile.close();
+    return stoi(procIdx);
 }
 
 int main(int argc, const char *argv[])
@@ -142,10 +151,15 @@ int main(int argc, const char *argv[])
     //get file names
     vector<string> fileName = getFiles(dataRootPath);
 
+    //assign ranges to the distributor processes
     server.distributors = assignDistributers(fileName.size(), server.childrenCount);
+
     cout << fileName.size() << " files found" << endl;
     for (int k = 0; k < fileName.size(); k++)
         cout << "\t" << fileName[k] << endl;
+
+    int foo = getProcessNum(fileName[1]);
+    cout << foo << endl;
 
     // for (int k = 0; k < server.distributors.size(); k++)
     // {
