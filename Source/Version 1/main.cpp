@@ -23,17 +23,26 @@
 #include <vector>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <string>
 
 using namespace std;
 
-int main(int argc, const char *argv[])
+struct distributor
 {
-    const char *processCount = argv[1];
-    const char *dataRootPath = argv[2];
-    const char *outFile = argv[3];
+    int startIdx;
+    int endIdx;
+    int fileCount;
+    std::vector<string> files;
+};
 
-    // printf("Count: %s, directory: %s,Outfile: %s", processCount, dataRootPath, outFile);
+struct Server
+{
+    int childrenCount;
+    std::vector<distributor> distributors;
+};
 
+vector<string> getFiles(const char *dataRootPath)
+{
     DIR *directory = opendir(dataRootPath);
     if (directory == NULL)
     {
@@ -53,9 +62,66 @@ int main(int argc, const char *argv[])
     }
     closedir(directory);
 
+    return fileName;
+}
+
+vector<distributor> assignDistributers(int fileCount, int distCount)
+{
+    int filePerDist = fileCount / distCount;
+    int remainder = 0;
+    if (fileCount % distCount != 0)
+    {
+        int remainder = fileCount % distCount;
+    }
+
+    vector<distributor> distributors;
+    int start = 0;
+    // minus one bc start at 0
+    int end = filePerDist - 1;
+    for (int i = 0; i < distCount; i++)
+    {
+        //init distributor
+        distributor dist;
+        //evenly spread out remainder
+        if (remainder != 0)
+        {
+            end++;
+            remainder--;
+        }
+
+        //assign values to dist and add to vector
+        printf("distIdx: %d , start: %d, end: %d \n", i, start, end);
+        dist.startIdx = start;
+        dist.endIdx = end;
+        dist.fileCount = end - start + 1;
+        distributors.push_back(dist);
+
+        //change the markers
+        start = end + 1;
+        end += filePerDist;
+    }
+    return distributors;
+}
+
+int main(int argc, const char *argv[])
+{
+    const char *processCount = argv[1];
+    const char *dataRootPath = argv[2];
+    const char *outFile = argv[3];
+
+    // printf("Count: %s, directory: %s,Outfile: %s", processCount, dataRootPath, outFile);
+
+    //init server
+    Server server;
+    server.childrenCount = atoi(processCount);
+
+    //get file names
+    vector<string> fileName = getFiles(dataRootPath);
+
+    server.distributors = assignDistributers(fileName.size(), server.childrenCount);
     cout << fileName.size() << " files found" << endl;
-    for (int k = 0; k < fileName.size(); k++)
-        cout << "\t" << fileName[k] << endl;
+    // for (int k = 0; k < fileName.size(); k++)
+    //     cout << "\t" << fileName[k] << endl;
 
     return 0;
 }
