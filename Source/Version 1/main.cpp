@@ -139,6 +139,20 @@ int getOrderIdx(string filePath)
     return stoi(procIdx);
 }
 
+string getFileContent(string filePath) {
+    ifstream inFile(filePath);
+    string junk;
+    string fileText;
+    if (inFile.is_open())
+    {
+        inFile >> junk;
+        inFile >> junk;
+        getline(inFile,fileText);
+    }
+    inFile.close();
+    return fileText + '\n'; 
+}
+
 vector< pair<int, int> > distributeFiles(distributor &dist, vector<string> &files)
 {
     // init map that holds distributor/file idx pairs to return
@@ -184,18 +198,16 @@ string processData(vector<int> &todoList,vector<string> &files) {
         sortedTodoList.push_back(currfile);
     }
 
-    cout << "unsorted:"<< endl;
-    for (int k = 0; k < sortedTodoList.size(); k++){
-        cout << "\t" << sortedTodoList[k].orderIdx << endl;
-    }
-
+    //sort lists
     sort(sortedTodoList.begin(), sortedTodoList.end(), fileD);
 
-    cout << "sorted:"<< endl;
-    for (int k = 0; k < sortedTodoList.size(); k++){
-        cout << "\t" << sortedTodoList[k].orderIdx << endl;
+    string fileChunk;
+    for (int j = 0; j< sortedTodoList.size();j++) {
+        string fileContent = getFileContent(files[sortedTodoList[j].fileIdx]);
+        fileChunk = fileChunk + fileContent;
     }
-    return "fart";
+
+    return fileChunk;
 }
 
 int main(int argc, const char *argv[])
@@ -216,11 +228,11 @@ int main(int argc, const char *argv[])
     //assign ranges to the distributor processes
     server.distributors = assignDistributers(fileName.size(), server.childrenCount);
 
-    cout << fileName.size() << " files found" << endl;
-    for (int k = 0; k < fileName.size(); k++){
-        cout << "\t" << fileName[k] << endl;
-        // cout << "\t" << getOrderIdx(fileName[k]) << endl;
-    }
+    // cout << fileName.size() << " files found" << endl;
+    // for (int k = 0; k < fileName.size(); k++){
+    //     cout << "\t" << fileName[k] << endl;
+    //     // cout << "\t" << getOrderIdx(fileName[k]) << endl;
+    // }
     //distributors job
     for (int k = 0; k < server.distributors.size(); k++)
     {
@@ -241,8 +253,9 @@ int main(int argc, const char *argv[])
     string wholeFile;
     for (int i = 0; i< server.distributors.size(); i ++) {
         string fileChunk = processData(server.distributors[i].todoList,fileName);
-        // wholeFile = wholeFile + fileChunk;
+        wholeFile = wholeFile + fileChunk;
     }
+    
 
     //write the completed file to the output file
     //provided as argument
