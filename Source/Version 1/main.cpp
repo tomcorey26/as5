@@ -45,6 +45,11 @@ struct Server
     std::vector<distributor> distributors;
 };
 
+// struct DataFile {
+//     int lineOrderIdx,
+
+// }
+
 vector<string> getFiles(const char *dataRootPath)
 {
     DIR *directory = opendir(dataRootPath);
@@ -121,6 +126,19 @@ int getProcessNum(string filePath)
     return stoi(procIdx);
 }
 
+int getOrderIdx(string filePath)
+{
+    ifstream inFile(filePath);
+    string procIdx;
+    if (inFile.is_open())
+    {
+        inFile >> procIdx;
+        inFile >> procIdx;
+    }
+    inFile.close();
+    return stoi(procIdx);
+}
+
 vector< pair<int, int> > distributeFiles(distributor &dist, vector<string> &files)
 {
     // init map that holds distributor/file idx pairs to return
@@ -148,6 +166,38 @@ vector< pair<int, int> > distributeFiles(distributor &dist, vector<string> &file
     return processFilePairs;
 }
 
+struct fileData {
+    int fileIdx;
+    int orderIdx;
+
+    bool operator() (fileData i,fileData j) { return (i.orderIdx<j.orderIdx);}
+}fileD;
+
+string processData(vector<int> &todoList,vector<string> &files) {
+    
+    //loop through todo list
+    vector<fileData> sortedTodoList;
+    for(int i = 0; i < todoList.size();i++){
+        fileData currfile;
+        currfile.fileIdx = todoList[i];
+        currfile.orderIdx = getOrderIdx(files[todoList[i]]);
+        sortedTodoList.push_back(currfile);
+    }
+
+    cout << "unsorted:"<< endl;
+    for (int k = 0; k < sortedTodoList.size(); k++){
+        cout << "\t" << sortedTodoList[k].orderIdx << endl;
+    }
+
+    sort(sortedTodoList.begin(), sortedTodoList.end(), fileD);
+
+    cout << "sorted:"<< endl;
+    for (int k = 0; k < sortedTodoList.size(); k++){
+        cout << "\t" << sortedTodoList[k].orderIdx << endl;
+    }
+    return "fart";
+}
+
 int main(int argc, const char *argv[])
 {
     const char *processCount = argv[1];
@@ -167,9 +217,11 @@ int main(int argc, const char *argv[])
     server.distributors = assignDistributers(fileName.size(), server.childrenCount);
 
     cout << fileName.size() << " files found" << endl;
-    for (int k = 0; k < fileName.size(); k++)
+    for (int k = 0; k < fileName.size(); k++){
         cout << "\t" << fileName[k] << endl;
-
+        // cout << "\t" << getOrderIdx(fileName[k]) << endl;
+    }
+    //distributors job
     for (int k = 0; k < server.distributors.size(); k++)
     {
         //init map
@@ -178,8 +230,22 @@ int main(int argc, const char *argv[])
         processFilePairs = distributeFiles(server.distributors[k], fileName);
         for (int j = 0; j < processFilePairs.size(); j++)
         {
-            cout << "First: " << processFilePairs[j].first << " Second: " << processFilePairs[j].second << '\n';
+            //add file pair idex to correspongding distritubtor
+            server.distributors[processFilePairs[j].first].todoList.push_back(processFilePairs[j].second);
         }
     }
+
+    //data processing loop
+    //the function should return the reorganized string
+    // then the server concatanates them together
+    string wholeFile;
+    for (int i = 0; i< server.distributors.size(); i ++) {
+        string fileChunk = processData(server.distributors[i].todoList,fileName);
+        // wholeFile = wholeFile + fileChunk;
+    }
+
+    //write the completed file to the output file
+    //provided as argument
+
     return 0;
 }
