@@ -100,7 +100,7 @@ vector<distributor> assignDistributers(int fileCount, int distCount)
         }
 
         //assign values to dist and add to vector
-        printf("distIdx: %d , start: %d, end: %d \n", i, start, end);
+        // printf("distIdx: %d , start: %d, end: %d \n", i, start, end);
         dist.id = i;
         dist.startIdx = start;
         dist.endIdx = end;
@@ -210,6 +210,13 @@ string processData(vector<int> &todoList,vector<string> &files) {
     return fileChunk;
 }
 
+void writeSortedCodeToFile(const char *outFile,string code) {
+    ofstream myfile;
+    myfile.open (outFile);
+    myfile << code;
+    myfile.close();
+}
+
 int main(int argc, const char *argv[])
 {
     const char *processCount = argv[1];
@@ -256,9 +263,9 @@ int main(int argc, const char *argv[])
         wholeFile = wholeFile + fileChunk;
     }
     
-
     //write the completed file to the output file
     //provided as argument
+    writeSortedCodeToFile(outFile,wholeFile);
 
     return 0;
 }
