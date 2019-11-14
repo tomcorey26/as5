@@ -26,8 +26,10 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string>
+#include <unistd.h> 
 
 using namespace std;
+void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx);
 
 struct distributor
 {
@@ -35,7 +37,6 @@ struct distributor
     int startIdx;
     int endIdx;
     int fileCount;
-    std::vector<string> files;
     std::vector<int> todoList;
 };
 
@@ -150,10 +151,14 @@ string getFileContent(string filePath) {
     return fileText + '\n'; 
 }
 
-vector< pair<int, int> > distributeFiles(distributor &dist, vector<string> &files)
+void distributeFiles(int distCount,distributor &dist, vector<string> &files)
 {
-    // init map that holds distributor/file idx pairs to return
-    vector< pair<int, int> > processFilePairs;
+    // init vector and add empty vector arrays representing each distributor
+    vector< vector<int> > distAssignedIndexs;
+    for (int j = 0; j < distCount; j++) {
+        vector<int> empty;
+        distAssignedIndexs.push_back(empty);
+    }
 
     //loop through files in distributor range
     for (int i = dist.startIdx; i <= dist.endIdx; i++)
@@ -161,21 +166,31 @@ vector< pair<int, int> > distributeFiles(distributor &dist, vector<string> &file
         //read from file and get the num of process it should be assigned to
         int processNum = getProcessNum(files[i]);
         int fileIdx = i;
-
-        //add processes to current distributors todo list
-        // if their assigned process matches current distributor
-        if (processNum == dist.id)
-        {
-            dist.todoList.push_back(fileIdx);
-        }
-        // if not add to map the distributor id/ fileidx pair
-        else
-        {
-            processFilePairs.push_back(make_pair(processNum, fileIdx));
-        }
+        distAssignedIndexs[processNum].push_back(i);
     }
-    return processFilePairs;
+
+    //write vector of ints to file
+    writeDistributorOutputToFile(distAssignedIndexs,dist.id);
 }
+
+void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx) {
+    string fileName = "dist" + to_string(idx);
+    ofstream file;
+    file.open(fileName);
+    
+    for (int i = 0; i < assignedIndexes.size(); i++) { 
+        string line = to_string(assignedIndexes[i].size());
+        for (int j = 0; j < assignedIndexes[i].size(); j++) {
+            line = line + " " + to_string(assignedIndexes[i][j]);
+        }
+        cout << "the line: " << line << endl;
+        file << line << '\n';
+        file.flush();
+    }
+    file.close();
+    exit(0);
+}
+
 
 struct fileData {
     int fileIdx;
@@ -214,6 +229,8 @@ void writeSortedCodeToFile(const char *outFile,string code) {
     myfile.close();
 }
 
+// void writeVectorToFile(vector)
+
 int main(int argc, const char *argv[])
 {
     const char *processCount = argv[1];
@@ -232,37 +249,37 @@ int main(int argc, const char *argv[])
     //assign ranges to the distributor processes
     server.distributors = assignDistributers(fileName.size(), server.childrenCount);
 
-    // cout << fileName.size() << " files found" << endl;
-    // for (int k = 0; k < fileName.size(); k++){
-    //     cout << "\t" << fileName[k] << endl;
-    //     // cout << "\t" << getOrderIdx(fileName[k]) << endl;
-    // }
     //distributors job
+        //write process todolist to file
     for (int k = 0; k < server.distributors.size(); k++)
     {
-        //init map
-        vector< pair<int, int> > processFilePairs;
-        //distributor function here
-        processFilePairs = distributeFiles(server.distributors[k], fileName);
-        for (int j = 0; j < processFilePairs.size(); j++)
-        {
-            //add file pair idex to correspongding distritubtor
-            server.distributors[processFilePairs[j].first].todoList.push_back(processFilePairs[j].second);
+        int p = fork();
+
+        //write processe/file idx pairs to file
+        //write process todolist to file
+        if (p == 0) {
+            cout << "twice" << endl;
+            distributeFiles(server.distributors.size(),server.distributors[k], fileName);
         }
+        else {
+            wait(NULL);
+        }
+        
     }
 
     //data processing loop
     //the function should return the reorganized string
     // then the server concatanates them together
-    string wholeFile;
-    for (int i = 0; i< server.distributors.size(); i ++) {
-        string fileChunk = processData(server.distributors[i].todoList,fileName);
-        wholeFile = wholeFile + fileChunk;
-    }
+
+    // string wholeFile;
+    // for (int i = 0; i< server.distributors.size(); i ++) {
+    //     string fileChunk = processData(server.distributors[i].todoList,fileName);
+    //     wholeFile = wholeFile + fileChunk;
+    // }
     
     //write the completed file to the output file
     //provided as argument
-    writeSortedCodeToFile(outFile,wholeFile);
+    // writeSortedCodeToFile(outFile,wholeFile);
 
     return 0;
 }
