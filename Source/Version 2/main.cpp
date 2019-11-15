@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string>
+#include <sstream>
 #include <unistd.h> 
 
 using namespace std;
@@ -45,7 +46,10 @@ struct Server
     int childrenCount;
     std::vector<distributor> distributors;
 };
-
+//TODO document functions and add doxygen
+//TODO fix incorrect process number problem
+//TODO Figure out the end of line problem
+//TODO test if this works on linux
 vector<string> getFiles(const char *dataRootPath)
 {
     DIR *directory = opendir(dataRootPath);
@@ -179,9 +183,10 @@ void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx
     file.open(fileName);
     
     for (int i = 0; i < assignedIndexes.size(); i++) { 
-        string line = to_string(assignedIndexes[i].size());
+        // = to_string(assignedIndexes[i].size());
+        string line;
         for (int j = 0; j < assignedIndexes[i].size(); j++) {
-            line = line + " " + to_string(assignedIndexes[i][j]);
+            line = line + to_string(assignedIndexes[i][j]) + " ";
         }
         cout << "the line: " << line << endl;
         file << line << '\n';
@@ -199,19 +204,58 @@ struct fileData {
     bool operator() (fileData i,fileData j) { return (i.orderIdx<j.orderIdx);}
 }fileD;
 
-string processData(vector<int> &todoList,vector<string> &files) {
-    
-    //loop through todo list
-    vector<fileData> sortedTodoList;
-    for(int i = 0; i < todoList.size();i++){
-        fileData currfile;
-        currfile.fileIdx = todoList[i];
-        currfile.orderIdx = getOrderIdx(files[todoList[i]]);
-        sortedTodoList.push_back(currfile);
-    }
+vector<fileData> getIdxArray (int distCount, vector<string> &files,int distIdx) {
 
-    //sort lists
+    vector<fileData> sortedTodoList;
+    //loop the dist files
+    //open each dist file, get array of ints corresponding to which distriubtor this is (loop get line disidx times)
+    cout << "dist count" << distCount << endl;
+    for(int i = 0; i < distCount;i++){
+        string path = "dist" + to_string(i);
+        ifstream inFile(path);
+        string fileText;
+
+        //skip lines to get to correct dist vector
+        for (int j =0; j < distIdx;j++){
+            getline(inFile,fileText);
+        }
+        //get correct dist line and assign it to string
+        getline(inFile,fileText);
+        cout << "line from dist " << i << " " << fileText << endl;
+
+        stringstream dataLine(fileText); 
+        string number; 
+
+        while(getline(dataLine, number, ' ')) 
+        { 
+            fileData currfile;
+            currfile.fileIdx = stoi(number);
+            currfile.orderIdx = getOrderIdx(files[currfile.fileIdx]); 
+            sortedTodoList.push_back(currfile);
+        } 
+        inFile.close();
+        //check if empty or not 
+    //     cout << "length: " << length << endl;
+    //     vector<fileData> lineData;
+    //     for(int k = 0; k < length; k++ ) {
+    //         fileData currfile;
+
+    //         inFile >> fileText;
+    //         currfile.fileIdx = stoi(fileText);
+    //         currfile.orderIdx = getOrderIdx(files[currfile.fileIdx]);
+
+    //         lineData.push_back(currfile);
+    //     }
+    //     sortedTodoList.insert(sortedTodoList.end(), lineData.begin(),lineData.end());
+    //     inFile.close(); 
+    }
     sort(sortedTodoList.begin(), sortedTodoList.end(), fileD);
+    return sortedTodoList;
+}
+
+void processData(int distCount,int distIdx, vector<string> &files) {
+
+    vector<fileData> sortedTodoList = getIdxArray(distCount,files,distIdx);
 
     string fileChunk;
     for (int j = 0; j< sortedTodoList.size();j++) {
@@ -219,7 +263,9 @@ string processData(vector<int> &todoList,vector<string> &files) {
         fileChunk = fileChunk + fileContent;
     }
 
-    return fileChunk;
+    cout << fileChunk << endl;
+
+    //write file chunk to file
 }
 
 void writeSortedCodeToFile(const char *outFile,string code) {
@@ -238,7 +284,7 @@ int main(int argc, const char *argv[])
     const char *outFile = argv[3];
 
     // printf("Count: %s, directory: %s,Outfile: %s", processCount, dataRootPath, outFile);
-
+    
     //init server
     Server server;
     server.childrenCount = atoi(processCount);
@@ -246,6 +292,11 @@ int main(int argc, const char *argv[])
     //get file names
     vector<string> fileName = getFiles(dataRootPath);
 
+    cout << fileName.size() << " files found" << endl;
+    for (int k = 0; k < fileName.size(); k++){
+        cout << "\t" << fileName[k] << endl;
+        // cout << "\t" << getOrderIdx(fileName[k]) << endl;
+    }
     //assign ranges to the distributor processes
     server.distributors = assignDistributers(fileName.size(), server.childrenCount);
 
@@ -258,7 +309,6 @@ int main(int argc, const char *argv[])
         //write processe/file idx pairs to file
         //write process todolist to file
         if (p == 0) {
-            cout << "twice" << endl;
             distributeFiles(server.distributors.size(),server.distributors[k], fileName);
         }
         else {
@@ -270,12 +320,20 @@ int main(int argc, const char *argv[])
     //data processing loop
     //the function should return the reorganized string
     // then the server concatanates them together
+    //TODO needs to be processes from fork for the data processing
+    for (int i = 0; i< server.distributors.size(); i ++) {
+        int p = fork();
 
-    // string wholeFile;
-    // for (int i = 0; i< server.distributors.size(); i ++) {
-    //     string fileChunk = processData(server.distributors[i].todoList,fileName);
-    //     wholeFile = wholeFile + fileChunk;
-    // }
+        if (p ==0) {
+            processData(server.distributors.size(),server.distributors[i].id,fileName);
+            exit(0);
+        }
+        else {
+            wait(NULL);
+        }
+    }
+
+    //read from created files and write them
     
     //write the completed file to the output file
     //provided as argument
