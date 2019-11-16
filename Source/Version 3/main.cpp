@@ -156,47 +156,6 @@ string getFileContent(string filePath) {
     return fileText + '\n'; 
 }
 
-void distributeFiles(int distCount,distributor &dist, vector<string> &files)
-{
-    // init vector and add empty vector arrays representing each distributor
-    vector< vector<int> > distAssignedIndexs;
-    for (int j = 0; j < distCount; j++) {
-        vector<int> empty;
-        distAssignedIndexs.push_back(empty);
-    }
-
-    //loop through files in distributor range
-    for (int i = dist.startIdx; i <= dist.endIdx; i++)
-    {
-        //read from file and get the num of process it should be assigned to
-        int processNum = getProcessNum(files[i]);
-        int fileIdx = i;
-        distAssignedIndexs[processNum].push_back(i);
-    }
-
-    //write vector of ints to file
-    writeDistributorOutputToFile(distAssignedIndexs,dist.id);
-}
-
-void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx) {
-    string fileName = "dist" + to_string(idx);
-    ofstream file;
-    file.open(fileName);
-    
-    for (int i = 0; i < assignedIndexes.size(); i++) { 
-        // = to_string(assignedIndexes[i].size());
-        string line;
-        for (int j = 0; j < assignedIndexes[i].size(); j++) {
-            line = line + to_string(assignedIndexes[i][j]) + " ";
-        }
-        file << line << '\n';
-        file.flush();
-    }
-    file.close();
-    exit(0);
-}
-
-
 struct fileData {
     int fileIdx;
     int orderIdx;
@@ -209,7 +168,6 @@ vector<fileData> getIdxArray (int distCount, vector<string> &files,int distIdx) 
     vector<fileData> sortedTodoList;
     //loop the dist files
     //open each dist file, get array of ints corresponding to which distriubtor this is (loop get line disidx times)
-    cout << "dist count" << distCount << endl;
     for(int i = 0; i < distCount;i++){
         string path = "dist" + to_string(i);
         ifstream inFile(path);
@@ -288,16 +246,11 @@ int main(int argc, const char *argv[])
     //get file names
     vector<string> fileName = getFiles(dataRootPath);
 
-    cout << fileName.size() << " files found" << endl;
-    for (int k = 0; k < fileName.size(); k++){
-        cout << "\t" << fileName[k] << endl;
-        // cout << "\t" << getOrderIdx(fileName[k]) << endl;
-    }
     //assign ranges to the distributor processes
     server.distributors = assignDistributers(fileName.size(), server.childrenCount);
 
     //distributors job
-        //write process todolist to file
+    //write process todolist to file
     for (int k = 0; k < server.distributors.size(); k++)
     {
         int p = fork();
@@ -305,7 +258,12 @@ int main(int argc, const char *argv[])
         //write processe/file idx pairs to file
         //write process todolist to file
         if (p == 0) {
-            distributeFiles(server.distributors.size(),server.distributors[k], fileName);
+            // args size, start idx, end idx, data root path
+            string distCount = to_string(server.distributors.size());
+            string startIdx = to_string(server.distributors[k].startIdx);
+            string endIdx= to_string(server.distributors[k].endIdx);
+            const char * args[] = {(char *) "./dist",(char *)distCount.c_str(),(char *) startIdx.c_str(),(char *) endIdx.c_str(),(char *) dataRootPath, (char *)NULL}; 
+            execvp(args[0],(char* const*)args);
         }
         else {
             wait(NULL);

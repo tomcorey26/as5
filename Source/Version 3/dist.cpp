@@ -25,9 +25,35 @@ struct Server
     std::vector<distributor> distributors;
 };
 
+vector<string> getFiles(const char *dataRootPath);
 void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx);
 void distributeFiles(int distCount,distributor &dist, vector<string> &files);
 int getProcessNum(string filePath);
+
+vector<string> getFiles(const char *dataRootPath)
+{
+    DIR *directory = opendir(dataRootPath);
+    if (directory == NULL)
+    {
+        cout << "data folder " << dataRootPath << " not found" << endl;
+        exit(1);
+    }
+
+    struct dirent *entry;
+    vector<string> fileName;
+    while ((entry = readdir(directory)) != NULL)
+    {
+        const char *name = entry->d_name;
+        if ((name[0] != '.') && (entry->d_type == DT_REG))
+        {
+            string filePath = string(dataRootPath) + string(entry->d_name);
+            fileName.push_back(filePath);
+        }
+    }
+    closedir(directory);
+
+    return fileName;
+}
 
 void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx) {
     string fileName = "dist" + to_string(idx);
@@ -44,7 +70,6 @@ void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx
         file.flush();
     }
     file.close();
-    exit(0);
 }
 
 
@@ -83,7 +108,16 @@ int getProcessNum(string filePath)
 }
 
 int main(int argc, const char *argv[]) {
-  int fart;
+  int distCount = atoi(argv[1]);
+  int startIdx = atoi(argv[2]);
+  int endIdx= atoi(argv[3]);
+  const char *dataRootPath = argv[4];
+
+  cout << "dis shit got called doe" << endl;
+  cout << distCount <<endl;
+  cout << "startidx: " << startIdx << endl;
+  cout << "endIdx: " << endIdx << endl;
+  cout << "path: " << dataRootPath << endl;
 
   return 0;
 }

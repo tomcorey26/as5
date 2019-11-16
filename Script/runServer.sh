@@ -4,6 +4,7 @@ filePath=$1
 outPath=$2
 
 # echo $filePath
+cd ../Source/Version\ 3/
 
 # OIFS="$IFS"
 IFS=$'\n'
@@ -19,5 +20,5 @@ done
 max=$((max+1))
 numProcesses=$max
 echo $numProcesses
-# ../../data_sets/Data\ Sets/End-of-line-fixed/Data\ Set\ 1/
-../Source/Version\ 2/main $numProcesses $filePath $outPath
+
+./main $numProcesses $filePath $outPath
