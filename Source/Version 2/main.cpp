@@ -179,7 +179,7 @@ void distributeFiles(int distCount,distributor &dist, vector<string> &files)
 }
 
 void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx) {
-    string fileName = "dist" + to_string(idx);
+    string fileName = "distributors/dist" + to_string(idx);
     ofstream file;
     file.open(fileName);
     
@@ -208,9 +208,8 @@ vector<fileData> getIdxArray (int distCount, vector<string> &files,int distIdx) 
     vector<fileData> sortedTodoList;
     //loop the dist files
     //open each dist file, get array of ints corresponding to which distriubtor this is (loop get line disidx times)
-    cout << "dist count" << distCount << endl;
     for(int i = 0; i < distCount;i++){
-        string path = "dist" + to_string(i);
+        string path = "distributors/dist" + to_string(i);
         ifstream inFile(path);
         string fileText;
 
@@ -249,7 +248,7 @@ void processData(int distCount,int distIdx, vector<string> &files) {
 
     //write file chunk to file
     ofstream myfile;
-    string fileName = "code"+ to_string(distIdx);
+    string fileName = "codeChunks/code"+ to_string(distIdx);
     myfile.open (fileName);
     myfile << fileChunk;
     myfile.close();
@@ -266,7 +265,7 @@ void writeCombinedFile(int dataFileCount, const char* outFile) {
     ofstream combined_file;
     combined_file.open(outFile);
     for (int k = 0; k < dataFileCount;k ++ ) {
-        string currFile = "code" + to_string(k);
+        string currFile = "codeChunks/code" + to_string(k);
         ifstream file(currFile);
         combined_file << file.rdbuf();
         file.close();
@@ -287,11 +286,11 @@ int main(int argc, const char *argv[])
     //get file names
     vector<string> fileName = getFiles(dataRootPath);
 
-    cout << fileName.size() << " files found" << endl;
-    for (int k = 0; k < fileName.size(); k++){
-        cout << "\t" << fileName[k] << endl;
-        // cout << "\t" << getOrderIdx(fileName[k]) << endl;
-    }
+    // cout << fileName.size() << " files found" << endl;
+    // for (int k = 0; k < fileName.size(); k++){
+    //     cout << "\t" << fileName[k] << endl;
+    //     // cout << "\t" << getOrderIdx(fileName[k]) << endl;
+    // }
     //assign ranges to the distributor processes
     server.distributors = assignDistributers(fileName.size(), server.childrenCount);
 
