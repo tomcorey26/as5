@@ -193,6 +193,7 @@ void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx
         file.flush();
     }
     file.close();
+    exit(0);
 }
 
 
@@ -304,9 +305,7 @@ int main(int argc, const char *argv[])
         //write processe/file idx pairs to file
         //write process todolist to file
         if (p == 0) {
-            //args dist 
             distributeFiles(server.distributors.size(),server.distributors[k], fileName);
-            exit(0);
         }
         else {
             wait(NULL);
