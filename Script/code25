@@ -1,0 +1,39 @@
+             for (unsigned int i=0; i<nbRows; i++)
+                 r2D[i] = pixelData + i*image.bytesPerRow;
+             image.raster2D = (void*) r2D;
+             //  The image is stored in an ASCII format
+             if (isASCII)
+             {
+                 for (unsigned int i = nbRows-1, invI = 0; invI < nbRows; i--, invI++)
+                 {
+                     unsigned int index = i*nbCols;
+                     
+                     for (unsigned int j = 0; j < nbCols; j++)
+                     {
+                         int grayVal;
+                         fscanf(inPPM, "%d", &grayVal);
+                         pixelData[index++] = (unsigned char) (grayVal);
+                     }
+                 }
+             }
+             //  The image is stored in a binary format
+             else
+             {
+                 for (unsigned int i = nbRows-1, invI = 0; invI < nbRows; i--, invI++)
+                 {
+                     unsigned int index = i*nbCols;
+                     
+                     for (unsigned j = 0; j < nbCols; j++, index++)
+                     {
+                         fscanf(inPPM, "%c", pixelData + index);
+                     }
+                 }
+             }
+         }
+         //  Up to 16 bits of gray levels
+         else if (maxVal  < 65536)
+         {
+             //  Allocate the pixel array
+             unsigned short* pixelData = (unsigned short*)malloc(nbCols*nbRows*2);
+             image.raster = pixelData;
+             image.type = DEEP_GRAY_RASTER;

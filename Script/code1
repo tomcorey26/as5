@@ -1,0 +1,39 @@
+ {
+     NO_ERROR = 0,
+     //
+     //  file-related
+     FILE_PATH_NULL,
+     FILE_NOT_FOUND,
+     CANNOT_OPEN_READ_FILE,
+     CANNOT_OPEN_WRITE_FILE,
+     WRONG_FILE_TYPE,
+     UNKNOWN_FILE_TYPE,
+     CANNOT_WRITE_FILE,
+     CANNOT_READ_FILE,
+     END_OF_FILE_ERROR,
+     //
+     //  Generic errors
+     MEMORY_ALLOCATION_ERROR,
+     //
+     //  command line argument errors
+     WRONG_NUMBER_OF_ARGUMENTS,
+     NO_DASH_ON_ROT_STRING,
+     INVALID_ROT_STRING,
+     //
+     //
+     INVALID_CROP_X_TYPE,
+     INVALID_CROP_Y_TYPE,
+     INVALID_CROP_CORNER,
+     INVALID_CROP_WIDTH_TYPE,
+     INVALID_CROP_HEIGHT_TYPE,
+     INVALID_CROP_SIZE,
+     //
+     NUM_ERROR_CODES     //  correct value because I don't skip codes
+     
+ } ImageIOErrorCode;
+ /** Going overly cute here:  Error message for each of the errors
+  *  supported.  This one is tricky because it's easy to get the order
+  *  different from that of the enum type
+  */
+ const char* ERROR_STR[NUM_ERROR_CODES] = {
+     "",     //  NO_ERROR

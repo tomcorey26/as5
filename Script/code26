@@ -1,0 +1,39 @@
+             image.maxVal = maxVal;
+             image.bytesPerPixel = 2;
+             image.bytesPerRow = 2*nbCols;
+             //  Allocate raster2D
+             unsigned short** r2D = (unsigned short**) calloc(nbRows, sizeof(unsigned short*));
+             for (unsigned int i=0; i<nbRows; i++)
+                 r2D[i] = pixelData + i*nbCols;
+             image.raster2D = (void*) r2D;
+             //  The image is stored in an ASCII format
+             if (isASCII)
+             {
+                 for (unsigned int i = nbRows-1, invI = 0; invI < nbRows; i--, invI++)
+                 {
+                     unsigned index = i*nbCols;
+                     
+                     for (unsigned int j = 0; j < nbCols; j++, index++)
+                     {
+ //                      fscanf(inPPM, "%hu", pixelData + index);
+                         fscanf(inPPM, "%hu", r2D[i] + j);
+                     }
+                     printf("\n");
+                 }
+             }
+             //  The image is stored in a binary format
+             else
+             {
+                 for (unsigned int i = nbRows-1, invI = 0; invI < nbRows; i--, invI++)
+                 {
+                     unsigned index = i*nbCols;
+                     
+                     for (unsigned j = 0; j < nbCols; j++, index++)
+                     {
+                         //  This is really ugly but "%hu" doesn't seem to work with
+                         //  binary files.
+                         char* vp = (char*) (r2D[i] + j);
+                         fscanf(inPPM, "%c%c", vp, vp+1);
+                     }
+                 }
+             }

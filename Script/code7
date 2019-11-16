@@ -1,0 +1,39 @@
+  */
+ int extractCropRegion(const char* argv[],
+                       unsigned int imageWidth, unsigned int imageHeight,
+                       unsigned int* cropCornerX, unsigned int* cropCornerY,
+                       unsigned int* cropWidth, unsigned int* cropHeight);
+ /** Produces a new image that is a cropped part of the input image
+  *  @param  image           the image to crop
+  *  @param  cropCornerX     x coordinate of the upper-left corner of the crop region
+  *  @param  cropCornerY     y coordinate of the upper-left corner of the crop region
+  *                          (counted from the top, so height - row index - 1
+  *  @param  cropWidth       width of the crop region
+  *  @param  cropHeight      height of the top region
+  *  @return     the new image resulting from applying the crop
+  */
+ ImageStruct cropImage(ImageStruct *image,
+                       unsigned int cropCornerX, unsigned int cropCornerY,
+                       unsigned int cropWidth, unsigned int cropHeight);
+ /** Produces a copy of the input image (rotation by 0).
+  *  This function currently only works for RGBA32_RASTER images.
+  *  @param  image   pointer to the RGBA32_RASTER image to copy
+  *  @return a new image struct that stores a copy of the input image
+  */
+ ImageStruct copyImage(const ImageStruct* image);
+ /** Produces a rotated copy of the input image (rotated by 90 degree clockwise).
+  *  This function currently only works for RGBA32_RASTER images.
+  *  @param  image   pointer to the RGBA32_RASTER image to rotate
+  *  @return a new image struct that stores the rotated image
+  */
+ ImageStruct rotateImage90(const ImageStruct* image);
+ /** Produces a rotated copy of the input image (rotated by 180 degree clockwise).
+  *  This function currently only works for RGBA32_RASTER images.
+  *  @param  image   pointer to the RGBA32_RASTER image to rotate
+  *  @return a new image struct that stores the rotated image
+  */
+ ImageStruct rotateImage180(const ImageStruct* image);
+ /** Produces a rotated copy of the input image (rotated by 270 degree clockwise).
+  *  This function currently only works for RGBA32_RASTER images.
+  *  @param  image   pointer to the RGBA32_RASTER image to rotate
+  *  @return a new image struct that stores the rotated image

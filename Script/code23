@@ -1,0 +1,39 @@
+     // --- open file ---
+     FILE* inPPM = fopen(filePath, "r");
+     if (inPPM == NULL)
+     {
+         printf("File %s not found\n", filePath);
+         exit(FILE_NOT_FOUND);
+     }
+     //  reset dimensions (just to play it safe)
+     unsigned int nbRows = 0, nbCols = 0, maxVal = 0;
+     ImageFileType fileType;
+     int isASCII = getHeaderInfoPPM_PGM_(inPPM, filePath, &fileType,
+                                         &nbRows, &nbCols, &maxVal);
+     
+     if (fileType == kPPM)
+     {
+         //  Allocate the pixel array
+         unsigned char* pixelData = (unsigned char*)calloc(4*nbCols*nbRows, 1);
+         //  We only want to handle values in the [0, 255] range
+         float valScale = (maxVal != 255) ?  255.f/maxVal : 1.f;
+         //  The image is stored in an ASCII format
+         if (isASCII)
+         {
+             for (unsigned int i = nbRows-1, invI = 0; invI < nbRows; i--, invI++)
+             {
+                 unsigned index = 4*i*nbCols;
+                 
+                 for (unsigned int j = 0; j < nbCols; j++)
+                 {
+                     int theRed, theGreen, theBlue;
+                     fscanf(inPPM, "%d%d%d", &theRed, &theGreen, &theBlue);
+                     pixelData[index++] = (unsigned char) (valScale*theRed);
+                     pixelData[index++] = (unsigned char) (valScale*theGreen);
+                     pixelData[index++] = (unsigned char) (valScale*theBlue);
+                     pixelData[index++] = 0xFF;  //  alpha
+                 }
+             }
+         }
+         //  The image is stored in a binary format
+         else

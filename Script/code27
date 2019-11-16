@@ -1,0 +1,39 @@
+         }
+         else
+         {
+             printf("Only gray levels up to 16 bits currently supported.\n");
+             exit(WRONG_FILE_TYPE);
+         }
+     }
+     
+     fclose(inPPM);
+     
+     //  Copy the information into the image struct
+     image.width = nbCols;
+     image.height = nbRows;
+     
+     return image;
+ }
+ //----------------------------------------------------------------------
+ //  writePPM_PGM()
+ //  Goal :  writes an image in PPM or PGM binary format
+ //  Input:  path to the output file
+ //          pointer to the image to write
+ //
+ //  Returns: Error code (0 = no error)
+ //
+ //  Note: Apparently PPM image files are always written upside-down
+ //----------------------------------------------------------------------
+ ImageIOErrorCode writePPM_PGM(const char* filePath, ImageStruct* img)
+ {
+     if (filePath == NULL)
+     {
+         printf("Error in writePPM: file name == NULL\n");
+         return FILE_PATH_NULL;
+     }
+     FILE* fp = fopen(filePath, "wb");
+     if (fp == NULL)
+     {
+         printf("Error in writePPM: couldn't write to file %s\n", filePath);
+         return CANNOT_OPEN_WRITE_FILE;
+     }

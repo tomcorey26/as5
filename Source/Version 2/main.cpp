@@ -50,6 +50,7 @@ struct Server
 //TODO fix incorrect process number problem
 //TODO Figure out the end of line problem
 //TODO test if this works on linux
+//TODO figure out how to get rid of spaces in beginning
 vector<string> getFiles(const char *dataRootPath)
 {
     DIR *directory = opendir(dataRootPath);
@@ -234,20 +235,6 @@ vector<fileData> getIdxArray (int distCount, vector<string> &files,int distIdx) 
             sortedTodoList.push_back(currfile);
         } 
         inFile.close();
-        //check if empty or not 
-    //     cout << "length: " << length << endl;
-    //     vector<fileData> lineData;
-    //     for(int k = 0; k < length; k++ ) {
-    //         fileData currfile;
-
-    //         inFile >> fileText;
-    //         currfile.fileIdx = stoi(fileText);
-    //         currfile.orderIdx = getOrderIdx(files[currfile.fileIdx]);
-
-    //         lineData.push_back(currfile);
-    //     }
-    //     sortedTodoList.insert(sortedTodoList.end(), lineData.begin(),lineData.end());
-    //     inFile.close(); 
     }
     sort(sortedTodoList.begin(), sortedTodoList.end(), fileD);
     return sortedTodoList;
@@ -263,9 +250,12 @@ void processData(int distCount,int distIdx, vector<string> &files) {
         fileChunk = fileChunk + fileContent;
     }
 
-    cout << fileChunk << endl;
-
     //write file chunk to file
+    ofstream myfile;
+    string fileName = "code"+ to_string(distIdx);
+    myfile.open (fileName);
+    myfile << fileChunk;
+    myfile.close();
 }
 
 void writeSortedCodeToFile(const char *outFile,string code) {
@@ -275,7 +265,17 @@ void writeSortedCodeToFile(const char *outFile,string code) {
     myfile.close();
 }
 
-// void writeVectorToFile(vector)
+void writeCombinedFile(int dataFileCount, const char* outFile) {
+    ofstream combined_file;
+    combined_file.open(outFile);
+    for (int k = 0; k < dataFileCount;k ++ ) {
+        string currFile = "code" + to_string(k);
+        ifstream file(currFile);
+        combined_file << file.rdbuf();
+        file.close();
+    } 
+    combined_file.close();
+}
 
 int main(int argc, const char *argv[])
 {
@@ -283,8 +283,6 @@ int main(int argc, const char *argv[])
     const char *dataRootPath = argv[2];
     const char *outFile = argv[3];
 
-    // printf("Count: %s, directory: %s,Outfile: %s", processCount, dataRootPath, outFile);
-    
     //init server
     Server server;
     server.childrenCount = atoi(processCount);
@@ -320,7 +318,6 @@ int main(int argc, const char *argv[])
     //data processing loop
     //the function should return the reorganized string
     // then the server concatanates them together
-    //TODO needs to be processes from fork for the data processing
     for (int i = 0; i< server.distributors.size(); i ++) {
         int p = fork();
 
@@ -332,12 +329,8 @@ int main(int argc, const char *argv[])
             wait(NULL);
         }
     }
-
     //read from created files and write them
-    
-    //write the completed file to the output file
-    //provided as argument
-    // writeSortedCodeToFile(outFile,wholeFile);
+    writeCombinedFile(server.distributors.size(),outFile);
 
     return 0;
 }

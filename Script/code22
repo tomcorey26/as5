@@ -1,0 +1,39 @@
+                       unsigned int cropCornerX, unsigned int cropCornerY,
+                       unsigned int cropWidth, unsigned int cropHeight)
+ {
+     ImageStruct imageOut = newImage(cropWidth, cropHeight, RGBA32_RASTER, 1);
+     
+     //  Beware that the images are stored upside-down from the way we view them,
+     //  So I need to invert the row indices.
+     for (unsigned int i = 0; i<cropHeight; i++)
+     {
+         memcpy((unsigned char*) imageOut.raster + (imageOut.height - i - 1)*imageOut.bytesPerRow,
+                (unsigned char*) imageIn->raster + (imageIn->height - i - cropCornerY - 1)*imageIn->bytesPerRow
+                                                 + cropCornerX * imageIn->bytesPerPixel,
+                cropWidth*imageIn->bytesPerPixel);
+         
+     }
+     return imageOut;
+ }
+ //----------------------------------------------------------------------
+ //  readPPM()
+ //  Goal :  read a 24-bit color image in PPM format (binary or ASCII)
+ //  Input:  the image to read
+ //          the input file name.
+ //
+ //  Rant:
+ //      PPM (and its PBM/PGM brethens) is just about the stupidest image
+ //      file format out there.  Only a Unix programmer could possibly have
+ //      come up with something that dumb.  It is dumb because it mixes
+ //      binary and ASCII stuff, and obliges you to work around the \r chars
+ //      (if you are working on any other platform other than Unix, there *will*
+ //      be \r characters), while Unix-centric stdio functions don't handle that
+ //      character as an end of string.  Of course, all the code written by Unix
+ //      geeks to read PPM will fail miserably if you try to run it on Windows
+ //      or on a Mac because they simply ignore \r.
+ //
+ //----------------------------------------------------------------------
+ ImageStruct readPPM_PGM(const char* filePath)
+ {
+     ImageStruct image;
+     

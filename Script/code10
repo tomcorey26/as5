@@ -1,0 +1,39 @@
+             writeTGA(outImagePath, &outImage);
+             free(outImage.raster);
+         }
+         break;
+         
+         //  do shut warnings up
+         default:
+             break;
+     }
+     
+     //  Cleanup and terminate
+     free(image.raster);
+     free(outImagePath);
+     
+     return 0;
+ }
+ ImageIOErrorCode determineRotation(const char* rotStr, RotationVal* rotVal)
+ {
+     //  string should start with a dash
+     if (rotStr[0] != '-')
+         return NO_DASH_ON_ROT_STRING;
+     
+     //  string should have characters besides the dash
+     if (strlen(rotStr) < 2)
+         return INVALID_ROT_STRING;
+     
+     *rotVal = NO_ROTATION;
+     //  Iterate through the string, keep the count of poisitive and
+     //  negative rotations
+     for (unsigned int k=1; k<strlen(rotStr); k++)
+     {
+         switch (rotStr[k])
+         {
+             case 'r':
+             case 'R':
+             *rotVal = (*rotVal + 1) % NUM_ROTATIONS;
+             break;
+             
+             case 'l':

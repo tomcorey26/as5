@@ -1,0 +1,39 @@
+                 return CANNOT_WRITE_FILE;
+             }
+         }
+     }
+     else if (img->type == DEEP_GRAY_RASTER)
+     {
+         fprintf(fp, "P5\n");
+         fprintf(fp, "%d %d\n", img->width, img->height);
+         fprintf(fp, "%d\n", img->maxVal);
+         unsigned short** raster2D = (unsigned short**) img->raster2D;
+         
+         for (unsigned int i=img->height-1, mirrorI=0; mirrorI<img->height; i--, mirrorI++)
+         {
+             size_t ierr = fwrite(raster2D[i], 2, img->width, fp);
+             
+             if (ierr != img->width)
+             {
+                 fprintf(stderr, "Error in writePPM: couldn't write to file %s\n",
+                                  filePath);
+                 fclose(fp);
+                 return CANNOT_WRITE_FILE;
+             }
+         }
+     }
+     else
+     {
+         printf("A float raster image cannon be saved in PPM/PGM format\n");
+         return WRONG_FILE_TYPE;
+     }
+     
+     fclose(fp);
+     return NO_ERROR;
+ }
+ char getHeaderInfoPPM_PGM_(FILE* inPPM, const char* filePath,
+                            ImageFileType* fileType,
+                            unsigned int* nbRows, unsigned int* nbCols,
+                            unsigned int* maxVal)
+ {
+     char    buf[80], skip[80], imgType[2], c;
