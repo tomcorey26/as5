@@ -27,7 +27,7 @@ struct Server
 
 vector<string> getFiles(const char *dataRootPath);
 void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx);
-void distributeFiles(int distCount,distributor &dist, vector<string> &files);
+void distributeFiles(int distCount,int id,int startIdx, int endIdx, vector<string> &files);
 int getProcessNum(string filePath);
 
 vector<string> getFiles(const char *dataRootPath)
@@ -56,7 +56,7 @@ vector<string> getFiles(const char *dataRootPath)
 }
 
 void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx) {
-    string fileName = "dist" + to_string(idx);
+    string fileName = "distributors/dist" + to_string(idx);
     ofstream file;
     file.open(fileName);
     
@@ -73,7 +73,7 @@ void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx
 }
 
 
-void distributeFiles(int distCount,distributor &dist, vector<string> &files)
+void distributeFiles(int distCount,int id,int startIdx, int endIdx, vector<string> &files)
 {
     // init vector and add empty vector arrays representing each distributor
     vector< vector<int> > distAssignedIndexs;
@@ -83,7 +83,7 @@ void distributeFiles(int distCount,distributor &dist, vector<string> &files)
     }
 
     //loop through files in distributor range
-    for (int i = dist.startIdx; i <= dist.endIdx; i++)
+    for (int i = startIdx; i <= endIdx; i++)
     {
         //read from file and get the num of process it should be assigned to
         int processNum = getProcessNum(files[i]);
@@ -92,7 +92,7 @@ void distributeFiles(int distCount,distributor &dist, vector<string> &files)
     }
 
     //write vector of ints to file
-    writeDistributorOutputToFile(distAssignedIndexs,dist.id);
+    writeDistributorOutputToFile(distAssignedIndexs,id);
 }
 
 int getProcessNum(string filePath)
@@ -112,12 +112,11 @@ int main(int argc, const char *argv[]) {
   int startIdx = atoi(argv[2]);
   int endIdx= atoi(argv[3]);
   const char *dataRootPath = argv[4];
+  int distId = atoi(argv[5]);
 
-  cout << "dis shit got called doe" << endl;
-  cout << distCount <<endl;
-  cout << "startidx: " << startIdx << endl;
-  cout << "endIdx: " << endIdx << endl;
-  cout << "path: " << dataRootPath << endl;
+  vector<string> fileName = getFiles(dataRootPath);
+
+  distributeFiles(distCount,distId,startIdx,endIdx,fileName);
 
   return 0;
 }

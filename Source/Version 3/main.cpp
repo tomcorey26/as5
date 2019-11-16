@@ -261,8 +261,9 @@ int main(int argc, const char *argv[])
             // args size, start idx, end idx, data root path
             string distCount = to_string(server.distributors.size());
             string startIdx = to_string(server.distributors[k].startIdx);
-            string endIdx= to_string(server.distributors[k].endIdx);
-            const char * args[] = {(char *) "./dist",(char *)distCount.c_str(),(char *) startIdx.c_str(),(char *) endIdx.c_str(),(char *) dataRootPath, (char *)NULL}; 
+            string endIdx = to_string(server.distributors[k].endIdx);
+            string distId = to_string(server.distributors[k].id);
+            const char * args[] = {(char *) "./dist",(char *)distCount.c_str(),(char *) startIdx.c_str(),(char *) endIdx.c_str(),(char *) dataRootPath,(char *) distId.c_str(), (char *)NULL}; 
             execvp(args[0],(char* const*)args);
         }
         else {
@@ -274,19 +275,19 @@ int main(int argc, const char *argv[])
     //data processing loop
     //the function should return the reorganized string
     // then the server concatanates them together
-    for (int i = 0; i< server.distributors.size(); i ++) {
-        int p = fork();
+    // for (int i = 0; i< server.distributors.size(); i ++) {
+    //     int p = fork();
 
-        if (p ==0) {
-            processData(server.distributors.size(),server.distributors[i].id,fileName);
-            exit(0);
-        }
-        else {
-            wait(NULL);
-        }
-    }
-    //read from created files and write them
-    writeCombinedFile(server.distributors.size(),outFile);
+    //     if (p ==0) {
+    //         processData(server.distributors.size(),server.distributors[i].id,fileName);
+    //         exit(0);
+    //     }
+    //     else {
+    //         wait(NULL);
+    //     }
+    // }
+    // //read from created files and write them
+    // writeCombinedFile(server.distributors.size(),outFile);
 
     return 0;
 }
