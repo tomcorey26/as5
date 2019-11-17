@@ -4,7 +4,7 @@ filePath=$1
 outPath=$2
 
 # echo $filePath
-cd ../Source/Version\ 3/
+cd ../Source/Version\ 1/
 
 # OIFS="$IFS"
 IFS=$'\n'

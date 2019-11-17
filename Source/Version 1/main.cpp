@@ -29,6 +29,7 @@
 #include <algorithm>
 
 using namespace std;
+void writeSortedCodeToFile(const char *outFile, string code);
 
 struct distributor
 {
@@ -152,10 +153,10 @@ string getFileContent(string filePath)
     return fileText + '\n';
 }
 
-vector<pair<int, int>> distributeFiles(distributor &dist, vector<string> &files)
+vector< pair<int, int> > distributeFiles(distributor &dist, vector<string> &files)
 {
     // init map that holds distributor/file idx pairs to return
-    vector<pair<int, int>> processFilePairs;
+    vector< pair<int, int> > processFilePairs;
 
     //loop through files in distributor range
     for (int i = dist.startIdx; i <= dist.endIdx; i++)
@@ -248,7 +249,7 @@ int main(int argc, const char *argv[])
     for (int k = 0; k < server.distributors.size(); k++)
     {
         //init map
-        vector<pair<int, int>> processFilePairs;
+        vector< pair<int, int> > processFilePairs;
         //distributor function here
         processFilePairs = distributeFiles(server.distributors[k], fileName);
         for (int j = 0; j < processFilePairs.size(); j++)

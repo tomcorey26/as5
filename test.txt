@@ -1,3 +1,7 @@
+todo
+fix incorrect max proccesses
+organize funcions into seperate file
+
 path to test data set
 
 ../../data_sets/Data\ Sets/End-of-line-fixed/Data\ Set\ 1/
