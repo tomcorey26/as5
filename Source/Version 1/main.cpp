@@ -19,6 +19,11 @@
 //		#define	DT_SOCK		12
 //		#define	DT_WHT		14
 
+/** \file main.cpp
+ * Version 1 
+ * Distributors and processors are functions
+ */
+
 #include <iostream>
 #include <fstream>
 #include <utility>
@@ -33,20 +38,25 @@ void writeSortedCodeToFile(const char *outFile, string code);
 
 struct distributor
 {
-    int id;
-    int startIdx;
-    int endIdx;
-    int fileCount;
-    std::vector<string> files;
-    std::vector<int> todoList;
+    int id; //!< index of distributor
+    int startIdx; //!< start idx of assigned files
+    int endIdx; //!< end idx of assigned files
+    int fileCount; //!< num of file assigned to dist
+    std::vector<int> todoList; //!< indexes of files to data process
 };
 
 struct Server
 {
-    int childrenCount;
-    std::vector<distributor> distributors;
+    int childrenCount; //!< num of distributors
+    std::vector<distributor> distributors; //!< vector that holds all dists
 };
 
+/**
+ * Opens directory with all textfiles and returns a vector with all the filenames
+ *
+ * @param dataRootPath path to folder that holds all the text files
+ * @return the vector of filenames
+ */
 vector<string> getFiles(const char *dataRootPath)
 {
     DIR *directory = opendir(dataRootPath);
@@ -72,6 +82,14 @@ vector<string> getFiles(const char *dataRootPath)
     return fileName;
 }
 
+/**
+ * Assigns distributors with file ranges that they will handle for
+ * distribution
+ *
+ * @param fileCount Total files in data set directory 
+ * @param distCount Amount of distributors
+ * @return Distributor struct with ranges assigned 
+ */
 vector<distributor> assignDistributers(int fileCount, int distCount)
 {
     int filePerDist = fileCount / distCount;
@@ -111,6 +129,12 @@ vector<distributor> assignDistributers(int fileCount, int distCount)
     return distributors;
 }
 
+/**
+ *  Gets the index of process that is assigned to the given file
+ *
+ * @param filePath Path to file in data directory 
+ * @return Index of process that is assigned to the file 
+ */
 int getProcessNum(string filePath)
 {
     ifstream inFile(filePath);
@@ -123,6 +147,12 @@ int getProcessNum(string filePath)
     return stoi(procIdx);
 }
 
+/**
+ *  Gets the order the text in the file should be in 
+ *
+ * @param filePath Path to file in data directory 
+ * @return Index of the order the text file should be in 
+ */
 int getOrderIdx(string filePath)
 {
     ifstream inFile(filePath);
@@ -136,6 +166,12 @@ int getOrderIdx(string filePath)
     return stoi(procIdx);
 }
 
+/**
+ *  Gets content of file without numbers in the beginning
+ *
+ * @param filePath Path to file in data directory 
+ * @return String of the file content 
+ */
 string getFileContent(string filePath)
 {
     ifstream inFile(filePath);
