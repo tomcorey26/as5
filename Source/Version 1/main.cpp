@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string>
+#include <algorithm>
 
 using namespace std;
 
@@ -134,7 +135,8 @@ int getOrderIdx(string filePath)
     return stoi(procIdx);
 }
 
-string getFileContent(string filePath) {
+string getFileContent(string filePath)
+{
     ifstream inFile(filePath);
     string junk;
     string fileText;
@@ -144,16 +146,16 @@ string getFileContent(string filePath) {
         inFile >> junk;
         inFile >> junk;
         //get the rest
-        getline(inFile,fileText);
+        getline(inFile, fileText);
     }
     inFile.close();
-    return fileText + '\n'; 
+    return fileText + '\n';
 }
 
-vector< pair<int, int> > distributeFiles(distributor &dist, vector<string> &files)
+vector<pair<int, int>> distributeFiles(distributor &dist, vector<string> &files)
 {
     // init map that holds distributor/file idx pairs to return
-    vector< pair<int, int> > processFilePairs;
+    vector<pair<int, int>> processFilePairs;
 
     //loop through files in distributor range
     for (int i = dist.startIdx; i <= dist.endIdx; i++)
@@ -177,18 +179,21 @@ vector< pair<int, int> > distributeFiles(distributor &dist, vector<string> &file
     return processFilePairs;
 }
 
-struct fileData {
+struct fileData
+{
     int fileIdx;
     int orderIdx;
 
-    bool operator() (fileData i,fileData j) { return (i.orderIdx<j.orderIdx);}
-}fileD;
+    bool operator()(fileData i, fileData j) { return (i.orderIdx < j.orderIdx); }
+} fileD;
 
-string processData(vector<int> &todoList,vector<string> &files) {
-    
+string processData(vector<int> &todoList, vector<string> &files)
+{
+
     //loop through todo list
     vector<fileData> sortedTodoList;
-    for(int i = 0; i < todoList.size();i++){
+    for (int i = 0; i < todoList.size(); i++)
+    {
         fileData currfile;
         currfile.fileIdx = todoList[i];
         currfile.orderIdx = getOrderIdx(files[todoList[i]]);
@@ -199,7 +204,8 @@ string processData(vector<int> &todoList,vector<string> &files) {
     sort(sortedTodoList.begin(), sortedTodoList.end(), fileD);
 
     string fileChunk;
-    for (int j = 0; j< sortedTodoList.size();j++) {
+    for (int j = 0; j < sortedTodoList.size(); j++)
+    {
         string fileContent = getFileContent(files[sortedTodoList[j].fileIdx]);
         fileChunk = fileChunk + fileContent;
     }
@@ -207,9 +213,10 @@ string processData(vector<int> &todoList,vector<string> &files) {
     return fileChunk;
 }
 
-void writeSortedCodeToFile(const char *outFile,string code) {
+void writeSortedCodeToFile(const char *outFile, string code)
+{
     ofstream myfile;
-    myfile.open (outFile);
+    myfile.open(outFile);
     myfile << code;
     myfile.close();
 }
@@ -241,7 +248,7 @@ int main(int argc, const char *argv[])
     for (int k = 0; k < server.distributors.size(); k++)
     {
         //init map
-        vector< pair<int, int> > processFilePairs;
+        vector<pair<int, int>> processFilePairs;
         //distributor function here
         processFilePairs = distributeFiles(server.distributors[k], fileName);
         for (int j = 0; j < processFilePairs.size(); j++)
@@ -255,14 +262,15 @@ int main(int argc, const char *argv[])
     //the function should return the reorganized string
     // then the server concatanates them together
     string wholeFile;
-    for (int i = 0; i< server.distributors.size(); i ++) {
-        string fileChunk = processData(server.distributors[i].todoList,fileName);
+    for (int i = 0; i < server.distributors.size(); i++)
+    {
+        string fileChunk = processData(server.distributors[i].todoList, fileName);
         wholeFile = wholeFile + fileChunk;
     }
-    
+
     //write the completed file to the output file
     //provided as argument
-    writeSortedCodeToFile(outFile,wholeFile);
+    writeSortedCodeToFile(outFile, wholeFile);
 
     return 0;
 }

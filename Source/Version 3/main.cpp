@@ -27,10 +27,11 @@
 #include <dirent.h>
 #include <string>
 #include <sstream>
-#include <unistd.h> 
+#include <unistd.h>
+#include <sys/wait.h>
 
 using namespace std;
-void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx);
+void writeDistributorOutputToFile(vector<vector<int>> assignedIndexes, int idx);
 
 struct distributor
 {
@@ -115,15 +116,17 @@ vector<distributor> assignDistributers(int fileCount, int distCount)
     return distributors;
 }
 
-void writeCombinedFile(int dataFileCount, const char* outFile) {
+void writeCombinedFile(int dataFileCount, const char *outFile)
+{
     ofstream combined_file;
     combined_file.open(outFile);
-    for (int k = 0; k < dataFileCount;k ++ ) {
+    for (int k = 0; k < dataFileCount; k++)
+    {
         string currFile = "codeChunks/code" + to_string(k);
         ifstream file(currFile);
         combined_file << file.rdbuf();
         file.close();
-    } 
+    }
     combined_file.close();
 }
 
@@ -151,40 +154,44 @@ int main(int argc, const char *argv[])
 
         //write processe/file idx pairs to file
         //write process todolist to file
-        if (p == 0) {
+        if (p == 0)
+        {
             // args size, start idx, end idx, data root path
             string distCount = to_string(server.distributors.size());
             string startIdx = to_string(server.distributors[k].startIdx);
             string endIdx = to_string(server.distributors[k].endIdx);
             string distId = to_string(server.distributors[k].id);
-            const char * args[] = {(char *) "./dist",(char *)distCount.c_str(),(char *) startIdx.c_str(),(char *) endIdx.c_str(),(char *) dataRootPath,(char *) distId.c_str(), (char *)NULL}; 
-            execvp(args[0],(char* const*)args);
+            const char *args[] = {(char *)"./dist", (char *)distCount.c_str(), (char *)startIdx.c_str(), (char *)endIdx.c_str(), (char *)dataRootPath, (char *)distId.c_str(), (char *)NULL};
+            execvp(args[0], (char *const *)args);
         }
-        else {
+        else
+        {
             wait(NULL);
         }
-        
     }
 
     //data processing loop
     //the function should return the reorganized string
     // then the server concatanates them together
-    for (int i = 0; i< server.distributors.size(); i ++) {
+    for (int i = 0; i < server.distributors.size(); i++)
+    {
         int p = fork();
 
-        if (p ==0) {
+        if (p == 0)
+        {
             //args dist count , dist id , outpath
             string distCount = to_string(server.distributors.size());
-            string distId= to_string(server.distributors[i].id);
-            const char *args[] = {(char *) "./proc", (char *) distCount.c_str(), (char *) distId.c_str(), (char *) dataRootPath,(char *) NULL};
-            execvp(args[0],(char* const*) args);
+            string distId = to_string(server.distributors[i].id);
+            const char *args[] = {(char *)"./proc", (char *)distCount.c_str(), (char *)distId.c_str(), (char *)dataRootPath, (char *)NULL};
+            execvp(args[0], (char *const *)args);
         }
-        else {
+        else
+        {
             wait(NULL);
         }
     }
     //read from created files and write them
-    writeCombinedFile(server.distributors.size(),outFile);
+    writeCombinedFile(server.distributors.size(), outFile);
 
     return 0;
 }

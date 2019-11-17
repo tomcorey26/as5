@@ -27,10 +27,12 @@
 #include <dirent.h>
 #include <string>
 #include <sstream>
-#include <unistd.h> 
+#include <unistd.h>
+#include <algorithm>
+#include <sys/wait.h>
 
 using namespace std;
-void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx);
+void writeDistributorOutputToFile(vector<vector<int>> assignedIndexes, int idx);
 
 struct distributor
 {
@@ -140,7 +142,8 @@ int getOrderIdx(string filePath)
     return stoi(procIdx);
 }
 
-string getFileContent(string filePath) {
+string getFileContent(string filePath)
+{
     ifstream inFile(filePath);
     string junk;
     string fileText;
@@ -150,17 +153,18 @@ string getFileContent(string filePath) {
         inFile >> junk;
         inFile >> junk;
         //get the rest
-        getline(inFile,fileText);
+        getline(inFile, fileText);
     }
     inFile.close();
-    return fileText + '\n'; 
+    return fileText + '\n';
 }
 
-void distributeFiles(int distCount,distributor &dist, vector<string> &files)
+void distributeFiles(int distCount, distributor &dist, vector<string> &files)
 {
     // init vector and add empty vector arrays representing each distributor
-    vector< vector<int> > distAssignedIndexs;
-    for (int j = 0; j < distCount; j++) {
+    vector<vector<int>> distAssignedIndexs;
+    for (int j = 0; j < distCount; j++)
+    {
         vector<int> empty;
         distAssignedIndexs.push_back(empty);
     }
@@ -175,18 +179,21 @@ void distributeFiles(int distCount,distributor &dist, vector<string> &files)
     }
 
     //write vector of ints to file
-    writeDistributorOutputToFile(distAssignedIndexs,dist.id);
+    writeDistributorOutputToFile(distAssignedIndexs, dist.id);
 }
 
-void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx) {
+void writeDistributorOutputToFile(vector<vector<int>> assignedIndexes, int idx)
+{
     string fileName = "distributors/dist" + to_string(idx);
     ofstream file;
     file.open(fileName);
-    
-    for (int i = 0; i < assignedIndexes.size(); i++) { 
+
+    for (int i = 0; i < assignedIndexes.size(); i++)
+    {
         // = to_string(assignedIndexes[i].size());
         string line;
-        for (int j = 0; j < assignedIndexes[i].size(); j++) {
+        for (int j = 0; j < assignedIndexes[i].size(); j++)
+        {
             line = line + to_string(assignedIndexes[i][j]) + " ";
         }
         file << line << '\n';
@@ -195,81 +202,89 @@ void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx
     file.close();
 }
 
-
-struct fileData {
+struct fileData
+{
     int fileIdx;
     int orderIdx;
 
-    bool operator() (fileData i,fileData j) { return (i.orderIdx<j.orderIdx);}
-}fileD;
+    bool operator()(fileData i, fileData j) { return (i.orderIdx < j.orderIdx); }
+} fileD;
 
-vector<fileData> getIdxArray (int distCount, vector<string> &files,int distIdx) {
+vector<fileData> getIdxArray(int distCount, vector<string> &files, int distIdx)
+{
 
     vector<fileData> sortedTodoList;
     //loop the dist files
     //open each dist file, get array of ints corresponding to which distriubtor this is (loop get line disidx times)
-    for(int i = 0; i < distCount;i++){
+    for (int i = 0; i < distCount; i++)
+    {
         string path = "distributors/dist" + to_string(i);
         ifstream inFile(path);
         string fileText;
 
         //skip lines to get to correct dist vector
-        for (int j =0; j < distIdx;j++){
-            getline(inFile,fileText);
+        for (int j = 0; j < distIdx; j++)
+        {
+            getline(inFile, fileText);
         }
         //get correct dist line and assign it to string
-        getline(inFile,fileText);
+        getline(inFile, fileText);
 
-        stringstream dataLine(fileText); 
-        string number; 
+        stringstream dataLine(fileText);
+        string number;
 
-        while(getline(dataLine, number, ' ')) 
-        { 
+        while (getline(dataLine, number, ' '))
+        {
             fileData currfile;
             currfile.fileIdx = stoi(number);
-            currfile.orderIdx = getOrderIdx(files[currfile.fileIdx]); 
+            currfile.orderIdx = getOrderIdx(files[currfile.fileIdx]);
             sortedTodoList.push_back(currfile);
-        } 
+        }
         inFile.close();
     }
     sort(sortedTodoList.begin(), sortedTodoList.end(), fileD);
     return sortedTodoList;
 }
 
-void processData(int distCount,int distIdx, vector<string> &files) {
+void processData(int distCount, int distIdx, vector<string> &files)
+{
 
-    vector<fileData> sortedTodoList = getIdxArray(distCount,files,distIdx);
+    vector<fileData> sortedTodoList = getIdxArray(distCount, files, distIdx);
 
     string fileChunk;
-    for (int j = 0; j< sortedTodoList.size();j++) {
+    for (int j = 0; j < sortedTodoList.size(); j++)
+    {
         string fileContent = getFileContent(files[sortedTodoList[j].fileIdx]);
         fileChunk = fileChunk + fileContent;
     }
 
     //write file chunk to file
     ofstream myfile;
-    string fileName = "codeChunks/code"+ to_string(distIdx);
-    myfile.open (fileName);
+    string fileName = "codeChunks/code" + to_string(distIdx);
+    myfile.open(fileName);
     myfile << fileChunk;
     myfile.close();
 }
 
-void writeSortedCodeToFile(const char *outFile,string code) {
+void writeSortedCodeToFile(const char *outFile, string code)
+{
     ofstream myfile;
-    myfile.open (outFile);
+    myfile.open(outFile);
     myfile << code;
     myfile.close();
 }
 
-void writeCombinedFile(int dataFileCount, const char* outFile) {
+void writeCombinedFile(int dataFileCount, const char *outFile)
+{
     ofstream combined_file;
     combined_file.open(outFile);
-    for (int k = 0; k < dataFileCount;k ++ ) {
+    for (int k = 0; k < dataFileCount; k++)
+    {
         string currFile = "codeChunks/code" + to_string(k);
         ifstream file(currFile);
         combined_file << file.rdbuf();
         file.close();
-    } 
+    }
     combined_file.close();
 }
 
@@ -295,40 +310,44 @@ int main(int argc, const char *argv[])
     server.distributors = assignDistributers(fileName.size(), server.childrenCount);
 
     //distributors job
-        //write process todolist to file
+    //write process todolist to file
     for (int k = 0; k < server.distributors.size(); k++)
     {
         int p = fork();
 
         //write processe/file idx pairs to file
         //write process todolist to file
-        if (p == 0) {
-            //args dist 
-            distributeFiles(server.distributors.size(),server.distributors[k], fileName);
+        if (p == 0)
+        {
+            //args dist
+            distributeFiles(server.distributors.size(), server.distributors[k], fileName);
             exit(0);
         }
-        else {
+        else
+        {
             wait(NULL);
         }
-        
     }
 
     //data processing loop
     //the function should return the reorganized string
     // then the server concatanates them together
-    for (int i = 0; i< server.distributors.size(); i ++) {
+    for (int i = 0; i < server.distributors.size(); i++)
+    {
         int p = fork();
 
-        if (p ==0) {
-            processData(server.distributors.size(),server.distributors[i].id,fileName);
+        if (p == 0)
+        {
+            processData(server.distributors.size(), server.distributors[i].id, fileName);
             exit(0);
         }
-        else {
+        else
+        {
             wait(NULL);
         }
     }
     //read from created files and write them
-    writeCombinedFile(server.distributors.size(),outFile);
+    writeCombinedFile(server.distributors.size(), outFile);
 
     return 0;
 }
