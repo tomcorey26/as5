@@ -9,10 +9,11 @@ cd ../Source/Version\ 3/
 # OIFS="$IFS"
 IFS=$'\n'
 max=0
-# for process 128 and 32 its getting wrong num of processes
+# for process 128 and 64 its getting wrong num of processes
 for f in "$filePath"*
 do
     num=$(grep -oh '^[0-9]*'  $f | head -1)
+    # echo $num
     if (($num > $max)); then
         max=$num
     fi
