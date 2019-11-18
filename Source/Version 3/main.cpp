@@ -36,7 +36,7 @@
 #include <sys/wait.h>
 
 using namespace std;
-void writeDistributorOutputToFile(vector<vector<int>> assignedIndexes, int idx);
+void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx);
 
 struct distributor
 {

@@ -32,7 +32,7 @@
 #include <sys/wait.h>
 
 using namespace std;
-void writeDistributorOutputToFile(vector<vector<int>> assignedIndexes, int idx);
+void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx);
 
 struct distributor
 {
@@ -159,7 +159,7 @@ string getFileContent(string filePath)
 void distributeFiles(int distCount, distributor &dist, vector<string> &files)
 {
     // init vector and add empty vector arrays representing each distributor
-    vector<vector<int>> distAssignedIndexs;
+    vector< vector<int> > distAssignedIndexs;
     for (int j = 0; j < distCount; j++)
     {
         vector<int> empty;
@@ -179,7 +179,7 @@ void distributeFiles(int distCount, distributor &dist, vector<string> &files)
     writeDistributorOutputToFile(distAssignedIndexs, dist.id);
 }
 
-void writeDistributorOutputToFile(vector<vector<int>> assignedIndexes, int idx)
+void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx)
 {
     string fileName = "distributors/dist" + to_string(idx);
     ofstream file;
