@@ -17,6 +17,20 @@ do
     if (($num > $max)); then
         max=$num
     fi
+
+    # while IFS= read -rn1 a; 
+    # do printf %s "${a:-$'\r'}"; 
+    # done
+
+    # while IFS= read -n1 char
+    # do  
+    #     # echo "$char"    
+    #     if [ "$char" = "\r" ]
+    #     then
+    #         echo "end of line shit found!"
+    #     fi  
+    # done < "$f"
+
 done
 max=$((max+1))
 numProcesses=$max
