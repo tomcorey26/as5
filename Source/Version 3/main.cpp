@@ -19,6 +19,11 @@
 //		#define	DT_SOCK		12
 //		#define	DT_WHT		14
 
+/** \file main.cpp
+ * Version 3
+ *  Proccesses and exec calls 
+ */
+
 #include <iostream>
 #include <fstream>
 #include <utility>
@@ -35,23 +40,25 @@ void writeDistributorOutputToFile(vector<vector<int>> assignedIndexes, int idx);
 
 struct distributor
 {
-    int id;
-    int startIdx;
-    int endIdx;
-    int fileCount;
-    std::vector<int> todoList;
+    int id; //!< index of distributor
+    int startIdx; //!< start idx of assigned files
+    int endIdx; //!< end idx of assigned files
+    int fileCount; //!< num of file assigned to dist
+    std::vector<int> todoList; //!< indexes of files to data process
 };
 
 struct Server
 {
-    int childrenCount;
-    std::vector<distributor> distributors;
+    int childrenCount; //!< num of distributors
+    std::vector<distributor> distributors; //!< vector that holds all dists
 };
-//TODO document functions and add doxygen
-//TODO fix incorrect process number problem
-//TODO Figure out the end of line problem
-//TODO test if this works on linux
-//TODO figure out how to get rid of spaces in beginning
+
+/**
+ * Opens directory with all textfiles and returns a vector with all the filenames
+ *
+ * @param dataRootPath path to folder that holds all the text files
+ * @return the vector of filenames
+ */
 vector<string> getFiles(const char *dataRootPath)
 {
     DIR *directory = opendir(dataRootPath);
@@ -77,6 +84,14 @@ vector<string> getFiles(const char *dataRootPath)
     return fileName;
 }
 
+/**
+ * Assigns distributors with file ranges that they will handle for
+ * distribution
+ *
+ * @param fileCount Total files in data set directory 
+ * @param distCount Amount of distributors
+ * @return Distributor struct with ranges assigned 
+ */
 vector<distributor> assignDistributers(int fileCount, int distCount)
 {
     int filePerDist = fileCount / distCount;
@@ -116,6 +131,12 @@ vector<distributor> assignDistributers(int fileCount, int distCount)
     return distributors;
 }
 
+/**
+ * Combines all code chunks created by data proccessing into one file
+ *
+ * @param dataFileCount total code chunk files 
+ * @param distCount path to outfile 
+ */
 void writeCombinedFile(int dataFileCount, const char *outFile)
 {
     ofstream combined_file;

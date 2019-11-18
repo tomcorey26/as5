@@ -1,3 +1,8 @@
+/** \file dist.cpp
+ * Version 3
+ * distribute files 
+ */
+
 #include <iostream>
 #include <fstream>
 #include <utility>
@@ -55,6 +60,12 @@ vector<string> getFiles(const char *dataRootPath)
     return fileName;
 }
 
+/**
+ *  Writes index to dist pairs to file 
+ *
+ * @param assignedIndexes Vector of Vector of indexes pertaining to each distributor 
+ * @param idx index of current distributor 
+ */
 void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx) {
     string fileName = "distributors/dist" + to_string(idx);
     ofstream file;
@@ -73,6 +84,15 @@ void writeDistributorOutputToFile(vector< vector<int> > assignedIndexes, int idx
 }
 
 
+/**
+ * Creates vector of vector of file index to distributors
+ *
+ * @param distCount Number of distributors there are
+ * @param id Index of current distributor
+ * @param startIdx Start index of assigned index range
+ * @param endIdx End index of assigned index range
+ * @param files vector of filepaths to data files
+ */
 void distributeFiles(int distCount,int id,int startIdx, int endIdx, vector<string> &files)
 {
     // init vector and add empty vector arrays representing each distributor
@@ -95,6 +115,12 @@ void distributeFiles(int distCount,int id,int startIdx, int endIdx, vector<strin
     writeDistributorOutputToFile(distAssignedIndexs,id);
 }
 
+/**
+ *  Gets the index of process that is assigned to the given file
+ *
+ * @param filePath Path to file in data directory 
+ * @return Index of process that is assigned to the file 
+ */
 int getProcessNum(string filePath)
 {
     ifstream inFile(filePath);

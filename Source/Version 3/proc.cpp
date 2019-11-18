@@ -1,3 +1,8 @@
+/** \file proc.cpp
+ * Version 3
+ * process files 
+ */
+
 #include <iostream>
 #include <fstream>
 #include <utility>
@@ -13,8 +18,8 @@ using namespace std;
 
 struct fileData
 {
-    int fileIdx;
-    int orderIdx;
+    int fileIdx; //!< Actual index of the file pertaining to the vector it is held in
+    int orderIdx; //!< The order the text of the file has to be in
 
     bool operator()(fileData i, fileData j) { return (i.orderIdx < j.orderIdx); }
 } fileD;
@@ -44,6 +49,12 @@ vector<string> getFiles(const char *dataRootPath)
     return fileName;
 }
 
+/**
+ *  Gets the order the text in the file should be in 
+ *
+ * @param filePath Path to file in data directory 
+ * @return Index of the order the text file should be in 
+ */
 int getOrderIdx(string filePath)
 {
     ifstream inFile(filePath);
@@ -57,6 +68,12 @@ int getOrderIdx(string filePath)
     return stoi(procIdx);
 }
 
+/**
+ *  Gets content of file without numbers in the beginning
+ *
+ * @param filePath Path to file in data directory 
+ * @return String of the file content 
+ */
 string getFileContent(string filePath)
 {
     ifstream inFile(filePath);
@@ -74,6 +91,13 @@ string getFileContent(string filePath)
     return fileText + '\n';
 }
 
+/**
+ * Gets all the indexes that it has been assigned for processing 
+ * 
+ * @param distCount number of distributors
+ * @param files vector of file paths to data files
+ * @param distIdx index of parent distributor
+ */ 
 vector<fileData> getIdxArray(int distCount, vector<string> &files, int distIdx)
 {
 
@@ -110,6 +134,13 @@ vector<fileData> getIdxArray(int distCount, vector<string> &files, int distIdx)
     return sortedTodoList;
 }
 
+/**
+ * Writes code chunks to file
+ * 
+ * @param distCount number of distributors
+ * @param files vector of file paths to data files
+ * @param distIdx index of parent distributor
+ */ 
 void processData(int distCount, int distIdx, vector<string> &files)
 {
 

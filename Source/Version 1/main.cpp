@@ -19,10 +19,6 @@
 //		#define	DT_SOCK		12
 //		#define	DT_WHT		14
 
-/** \file main.cpp
- * Version 1 
- * Distributors and processors are functions
- */
 
 #include <iostream>
 #include <fstream>
